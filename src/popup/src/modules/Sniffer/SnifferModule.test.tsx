@@ -11,6 +11,7 @@ import SnifferModule from "./SnifferModule";
 import {
   levelsSlice,
   levelInspectionsSlice,
+  playlistsSlice,
 } from "@hls-downloader/core/lib/store/slices";
 import type { Level } from "@hls-downloader/core/lib/entities";
 import {
@@ -359,6 +360,42 @@ describe("SnifferModule", () => {
     expect(container.textContent).toContain("No matching streams");
     expect(container.textContent).toContain("Clear filter");
     expect(container.textContent).not.toContain("Ready to detect a stream");
+  });
+
+  it("shows and filters by the captured video title", () => {
+    const { container, store } = renderSniffer();
+    act(() => {
+      store.dispatch(
+        playlistsSlice.actions.addPlaylist({
+          ...createPlaylist(
+            "lecture",
+            "https://example.com/lecture.m3u8",
+            3,
+            "JavaScript Course | Udemy",
+          ),
+          videoTitle: "23. Introducing the Modulo",
+        }),
+      );
+      store.dispatch(
+        playlistsSlice.actions.fetchPlaylistLevelsSuccess({
+          playlistID: "lecture",
+        }),
+      );
+    });
+
+    expect(
+      container.querySelector(
+        'button[aria-label="Choose quality for 23. Introducing the Modulo"]',
+      ),
+    ).not.toBeNull();
+
+    const filterInput = container.querySelector(
+      'input[aria-label="Filter captured streams"]',
+    ) as HTMLInputElement;
+    changeInput(filterInput, "modulo");
+
+    expect(container.textContent).toContain("23. Introducing the Modulo");
+    expect(container.textContent).not.toContain("First Video");
   });
 
   it("opens quality selection on the first playlist click", () => {

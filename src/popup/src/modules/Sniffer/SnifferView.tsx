@@ -380,8 +380,8 @@ const PlaylistRow = ({
         aria-checked={selection?.checked}
         aria-label={
           selection
-            ? `Select ${playlist.pageTitle || "captured stream"}`
-            : `Choose quality for ${playlist.pageTitle || "captured stream"}`
+            ? `Select ${playlist.videoTitle || playlist.pageTitle || "captured stream"}`
+            : `Choose quality for ${playlist.videoTitle || playlist.pageTitle || "captured stream"}`
         }
       >
         {selection && (
@@ -393,7 +393,7 @@ const PlaylistRow = ({
         )}
         <div className="min-w-0 flex-1">
           <div className="truncate text-[12px] font-bold leading-tight">
-            {playlist.pageTitle}
+            {playlist.videoTitle || playlist.pageTitle}
           </div>
           <div className="mt-1 truncate text-[10px] font-medium text-muted-foreground">
             {playlist.initiator || "Detected source"}
@@ -418,8 +418,8 @@ const PlaylistRow = ({
             onClick={copyPlaylistUrl}
             aria-label={
               copied
-                ? `URL copied for ${playlist.pageTitle || "captured stream"}`
-                : `Copy URL for ${playlist.pageTitle || "captured stream"}`
+                ? `URL copied for ${playlist.videoTitle || playlist.pageTitle || "captured stream"}`
+                : `Copy URL for ${playlist.videoTitle || playlist.pageTitle || "captured stream"}`
             }
             title={copied ? "URL copied" : "Copy URL"}
           >
@@ -443,7 +443,7 @@ const PlaylistRow = ({
             variant="ghost"
             className="h-8 w-8 text-muted-foreground hover:text-destructive"
             onClick={onRemove}
-            aria-label={`Remove ${playlist.pageTitle || "captured stream"}`}
+            aria-label={`Remove ${playlist.videoTitle || playlist.pageTitle || "captured stream"}`}
             title="Remove stream"
           >
             <Trash2 className="h-3.5 w-3.5" />

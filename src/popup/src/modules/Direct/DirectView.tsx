@@ -87,7 +87,9 @@ const DirectView = ({
               <div className="flex flex-col w-full gap-1">
                 <div className="flex items-center">
                   <div className="flex items-center gap-2">
-                    <div className="font-semibold">{item.pageTitle}</div>
+                    <div className="font-semibold">
+                      {item.videoTitle || item.pageTitle}
+                    </div>
                   </div>
                   <div className={cn("ml-auto text-xs")}>
                     {new Date(item.createdAt!).toLocaleString()}

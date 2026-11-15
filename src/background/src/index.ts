@@ -8,7 +8,7 @@ import {
   DiskBackedFS,
   initializeDownloadTracking,
 } from "./services/disk-backed-fs";
-import { M3u8Parser } from "./services/m3u8-parser";
+import { StreamParser } from "./services/stream-parser";
 
 const wrapStore = createWrapStore();
 
@@ -24,7 +24,7 @@ const wrapStore = createWrapStore();
       decryptor: CryptoDecryptor,
       fs: DiskBackedFS,
       loader: FetchLoader,
-      parser: M3u8Parser,
+      parser: StreamParser,
     },
     state,
   );

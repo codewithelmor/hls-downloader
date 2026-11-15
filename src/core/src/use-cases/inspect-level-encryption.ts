@@ -5,6 +5,25 @@ import { getPlaylistDocumentFactory } from "./get-playlist-document";
 
 const SUPPORTED_METHODS = ["AES-128"];
 
+const DRM_METHOD = /^DRM-protected [^(]*\((.+)\)$/;
+
+/** Explains, in plain words, why a stream with this method cannot be saved. */
+export function describeUnsupportedEncryption(method: string | null): string {
+  if (!method) return "Unsupported encryption method detected.";
+  const drm = DRM_METHOD.exec(method);
+  if (drm) {
+    return (
+      `Protected by ${drm[1]} DRM. The decryption key is only released to ` +
+      "the browser's built-in DRM module, so this stream can be played but " +
+      "not downloaded."
+    );
+  }
+  return (
+    `Unsupported encryption method: ${method}. ` +
+    `Only ${SUPPORTED_METHODS.join(", ")} streams can be decrypted.`
+  );
+}
+
 export const inspectLevelEncryptionFactory = (
   loader: ILoader,
   parser: IParser,
@@ -36,11 +55,7 @@ export const inspectLevelEncryptionFactory = (
       keyUris: normalizedKeyUris,
       iv: iv ?? null,
       supported,
-      message: supported
-        ? undefined
-        : method
-          ? `Unsupported encryption method: ${method}`
-          : "Unsupported encryption method detected",
+      message: supported ? undefined : describeUnsupportedEncryption(method),
     };
   };
   return run;

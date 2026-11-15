@@ -119,4 +119,73 @@ describe("playlist capture", () => {
     ).resolves.toBeUndefined();
     expect(store.dispatch).not.toHaveBeenCalled();
   });
+  describe("diagnostic logging", () => {
+    let info: ReturnType<typeof vi.spyOn>;
+    beforeEach(() => {
+      info = vi.spyOn(console, "info").mockImplementation(() => {});
+      info.mockClear();
+    });
+    const lastReason = () => String(info.mock.calls.at(-1)?.[0]);
+
+    it("explains requests that are not tied to a tab", async () => {
+      await listener({
+        ...details(
+          "https://cdn.example.com/master.m3u8",
+          "application/x-mpegurl",
+        ),
+        tabId: -1,
+      });
+      expect(lastReason()).toContain("not tied to a tab");
+    });
+
+    it("captures DASH manifests", async () => {
+      await listener(
+        details("https://cdn.example.com/manifest.mpd", "application/dash+xml"),
+      );
+      expect(lastReason()).toContain("stream captured");
+      expect(store.dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "playlists/addPlaylist" }),
+      );
+    });
+
+    it("captures a .mpd served with a generic type", async () => {
+      await listener(
+        details("https://cdn.example.com/v/stream.MPD?t=1", "text/xml"),
+      );
+      expect(store.dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "playlists/addPlaylist" }),
+      );
+    });
+
+    it("explains HTTP errors", async () => {
+      await listener(
+        details(
+          "https://cdn.example.com/master.m3u8",
+          "application/x-mpegurl",
+          403,
+        ),
+      );
+      expect(lastReason()).toContain("HTTP 403");
+    });
+
+    it("explains blocked sites", async () => {
+      browser.blocked.mockReturnValue(true);
+      await listener(
+        details("https://cdn.example.com/master.m3u8", "application/x-mpegurl"),
+      );
+      expect(lastReason()).toContain("blocklist");
+    });
+
+    it("logs successful captures", async () => {
+      await listener(
+        details("https://cdn.example.com/master.m3u8", "application/x-mpegurl"),
+      );
+      expect(lastReason()).toContain("stream captured");
+    });
+
+    it("stays quiet for requests that are not video", async () => {
+      await listener(details("https://example.com/app.js", "text/javascript"));
+      expect(info.mock.calls).toEqual([]);
+    });
+  });
 });

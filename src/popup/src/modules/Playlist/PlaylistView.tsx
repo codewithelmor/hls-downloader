@@ -58,6 +58,46 @@ interface Props {
   };
 }
 
+type EncryptionSummary = Props["encryptionSummaries"][number];
+
+const DRM_METHOD = /^DRM-protected [^(]*\((.+)\)$/;
+
+/**
+ * Names what blocks the download: a short headline for the footer and the
+ * full reason for each blocked track (tracks sharing a reason are merged).
+ */
+export function describeBlockedTracks(summaries: EncryptionSummary[]) {
+  const blocked = summaries.filter((summary) => !summary.supported);
+  const drmSystems = new Set<string>();
+  const methods = new Set<string>();
+  for (const { method } of blocked) {
+    const drm = method ? DRM_METHOD.exec(method) : null;
+    if (drm) drm[1].split(", ").forEach((name) => drmSystems.add(name));
+    else if (method) methods.add(method);
+  }
+
+  const causes = [
+    drmSystems.size > 0 ? `${[...drmSystems].join("/")} DRM` : null,
+    methods.size > 0 ? `${[...methods].join("/")} encryption` : null,
+  ].filter(Boolean);
+  const headline =
+    causes.length > 0
+      ? `Download blocked by ${causes.join(" and ")}.`
+      : "Download blocked by unsupported encryption.";
+
+  const byMessage = new Map<string, string[]>();
+  for (const summary of blocked) {
+    const message = summary.message ?? "Unsupported encryption.";
+    byMessage.set(message, [...(byMessage.get(message) ?? []), summary.label]);
+  }
+  const reasons = [...byMessage].map(([message, labels]) => ({
+    tracks: labels.join(" and "),
+    message,
+  }));
+
+  return { headline, reasons };
+}
+
 const PlaylistView = ({
   playlist,
   status,
@@ -73,7 +113,7 @@ const PlaylistView = ({
   onDownload,
   canDownload,
   onBack,
-  encryptionSummaries: _encryptionSummaries,
+  encryptionSummaries,
   inspectionPending,
   encryptionBlocked,
   estimate,
@@ -189,10 +229,12 @@ const PlaylistView = ({
         .join(" · ");
     }
 
+    const blocked = encryptionBlocked
+      ? describeBlockedTracks(encryptionSummaries)
+      : null;
+
     const footerMessage = [
-      !canDownload && encryptionBlocked
-        ? "Download blocked by encryption."
-        : null,
+      !canDownload && blocked ? blocked.headline : null,
       !canDownload && inspectionPending ? "Checking encryption..." : null,
       !canDownload && !encryptionBlocked && !inspectionPending
         ? "No compatible tracks found."
@@ -209,7 +251,11 @@ const PlaylistView = ({
               <BackButton label="All streams" onClick={() => onBack()} />
             )}
             <DetailHeader
-              title={playlist?.pageTitle || "Choose download quality"}
+              title={
+                playlist?.videoTitle ||
+                playlist?.pageTitle ||
+                "Choose download quality"
+              }
               supporting={
                 playlist?.uri ? (
                   <p className="truncate font-mono text-[9px]">
@@ -397,6 +443,21 @@ const PlaylistView = ({
           </div>
         </div>
         <div className="-mx-4 shrink-0 border-t border-border bg-background px-4 py-2">
+          {!canDownload && blocked && (
+            <ul
+              className="mb-2 space-y-1 text-[10px] leading-snug text-muted-foreground"
+              aria-label="Why the download is blocked"
+            >
+              {blocked.reasons.map((reason) => (
+                <li key={reason.tracks}>
+                  <span className="font-bold text-foreground">
+                    {reason.tracks}:
+                  </span>{" "}
+                  {reason.message}
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="flex min-h-8 items-center justify-between gap-3">
             <span
               className="min-w-0 truncate text-[9px] font-medium text-muted-foreground"
@@ -432,7 +493,7 @@ const PlaylistView = ({
                     Stream preview
                   </h3>
                   <p className="mt-0.5 max-w-[380px] truncate text-[10px] text-muted-foreground">
-                    {playlist.pageTitle || playlist.uri}
+                    {playlist.videoTitle || playlist.pageTitle || playlist.uri}
                   </p>
                 </div>
                 <Button

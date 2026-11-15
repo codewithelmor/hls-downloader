@@ -17,6 +17,7 @@
   "permissions": [
     "downloads",
     "offscreen",
+    "scripting",
     "storage",
     "unlimitedStorage",
     "tabs",

@@ -3,10 +3,9 @@ import { sanitizeFilename } from "./sanitize-filename";
 
 export const generateSubtitleFileName = () => {
   const run = (playlist: Playlist, level: Level): string => {
-    const baseTitle =
-      playlist.pageTitle && playlist.pageTitle.trim().length > 0
-        ? sanitizeFilename(playlist.pageTitle)
-        : "subtitle";
+    const title = playlist.videoTitle?.trim() || playlist.pageTitle?.trim();
+    const sanitizedTitle = title ? sanitizeFilename(title) : "";
+    const baseTitle = sanitizedTitle || "subtitle";
 
     const language = level.language || level.name || level.id || "track";
     const sanitizedLanguage = `${language}`.replace(/\s+/g, "-");

@@ -116,9 +116,15 @@ export default function BulkDownloadSheet({ bulk }: { bulk: BulkDownloads }) {
             <div className="min-w-0 flex-1">
               <p
                 className="truncate text-[11px] font-bold"
-                title={item.playlist.pageTitle || item.playlist.uri}
+                title={
+                  item.playlist.videoTitle ||
+                  item.playlist.pageTitle ||
+                  item.playlist.uri
+                }
               >
-                {item.playlist.pageTitle || item.playlist.uri}
+                {item.playlist.videoTitle ||
+                  item.playlist.pageTitle ||
+                  item.playlist.uri}
               </p>
               <p
                 className={`mt-1 text-[10px] leading-relaxed ${item.error ? "text-destructive" : "text-muted-foreground"}`}

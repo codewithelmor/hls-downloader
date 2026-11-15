@@ -20,6 +20,10 @@ export interface IAddPlaylistPayload extends Playlist {}
 export interface IRemovePlaylistPayload {
   playlistID: string;
 }
+export interface ISetPlaylistVideoTitlePayload {
+  playlistID: string;
+  videoTitle: string;
+}
 export interface IPlaylistsState {
   playlistsStatus: Record<string, PlaylistStatus | null>;
   playlists: Record<string, Playlist | null>;
@@ -31,6 +35,10 @@ interface IPlaylistsReducers {
   removePlaylist: CaseReducer<
     IPlaylistsState,
     PayloadAction<IRemovePlaylistPayload>
+  >;
+  setPlaylistVideoTitle: CaseReducer<
+    IPlaylistsState,
+    PayloadAction<ISetPlaylistVideoTitlePayload>
   >;
   fetchPlaylistLevels: CaseReducer<
     IPlaylistsState,
@@ -76,23 +84,33 @@ export const playlistsSlice: Slice<
       delete state.playlistsStatus[playlistID];
       delete state.playlists[playlistID];
     },
+    setPlaylistVideoTitle(
+      state,
+      action: PayloadAction<ISetPlaylistVideoTitlePayload>,
+    ) {
+      const { playlistID, videoTitle } = action.payload;
+      const playlist = state.playlists[playlistID];
+      if (playlist) {
+        state.playlists[playlistID] = { ...playlist, videoTitle };
+      }
+    },
     fetchPlaylistLevels(
       state,
-      action: PayloadAction<IFetchPlaylistLevelsPayload>
+      action: PayloadAction<IFetchPlaylistLevelsPayload>,
     ) {
       const { playlistID } = action.payload;
       state.playlistsStatus[playlistID]!.status = "fetching";
     },
     fetchPlaylistLevelsSuccess(
       state,
-      action: PayloadAction<IFetchPlaylistLevelsSuccessPayload>
+      action: PayloadAction<IFetchPlaylistLevelsSuccessPayload>,
     ) {
       const { playlistID } = action.payload;
       state.playlistsStatus[playlistID]!.status = "ready";
     },
     fetchPlaylistLevelsFailed(
       state,
-      action: PayloadAction<IFetchPlaylistLevelsFailedPayload>
+      action: PayloadAction<IFetchPlaylistLevelsFailedPayload>,
     ) {
       const { playlistID } = action.payload;
       state.playlistsStatus[playlistID]!.status = "error";

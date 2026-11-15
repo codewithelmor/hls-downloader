@@ -5,7 +5,7 @@ export const storeSubtitleTextFactory = (fs: IFS) => {
   const run = async (
     bucketId: string,
     level: Pick<Level, "language" | "name" | "id">,
-    playlist: Pick<Playlist, "pageTitle" | "uri">,
+    playlist: Pick<Playlist, "pageTitle" | "videoTitle" | "uri">,
     text: string
   ): Promise<void> => {
     console.log("[subtitle] store-subtitle-text", {
@@ -18,6 +18,7 @@ export const storeSubtitleTextFactory = (fs: IFS) => {
     const name =
       level.name ||
       language ||
+      playlist.videoTitle ||
       playlist.pageTitle ||
       playlist.uri.split("/").pop() ||
       "subtitle";

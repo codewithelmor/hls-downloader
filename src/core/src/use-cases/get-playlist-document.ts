@@ -17,6 +17,17 @@ export async function loadPlaylistText(
     : { text: await loader.fetchText(uri, attempts), uri };
 }
 
+function stripFragment(uri: string): string {
+  const hash = uri.indexOf("#");
+  return hash === -1 ? uri : uri.slice(0, hash);
+}
+
+function withFragmentOf(requestedURI: string, responseURI: string): string {
+  const hash = requestedURI.indexOf("#");
+  if (hash === -1 || responseURI.includes("#")) return responseURI;
+  return responseURI + requestedURI.slice(hash);
+}
+
 export const getPlaylistDocumentFactory = (loader: ILoader) => {
   return async (
     level: Level,
@@ -32,8 +43,14 @@ export const getPlaylistDocumentFactory = (loader: ILoader) => {
       attempts,
       (uri, count) => loadPlaylistText(loader, uri, count),
     );
+    // Response URLs never carry a fragment, but a DASH level uses one to name
+    // its track inside the shared manifest. Restore it, as a redirect would.
+    const document = { ...data, uri: withFragmentOf(requestedURI, data.uri) };
     // A redirected CDN URL can replace expired authentication parameters. Use
     // that response's context for its segments, initialization maps, and keys.
-    return { ...data, baseUri: data.uri !== requestedURI ? data.uri : baseUri };
+    return {
+      ...document,
+      baseUri: data.uri !== stripFragment(requestedURI) ? data.uri : baseUri,
+    };
   };
 };

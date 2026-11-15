@@ -1,6 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 import { Level } from "../src/entities";
-import { inspectLevelEncryptionFactory } from "../src/use-cases";
+import {
+  describeUnsupportedEncryption,
+  inspectLevelEncryptionFactory,
+} from "../src/use-cases";
 import type { ILoader, IParser } from "../src/services";
 
 describe("inspectLevelEncryptionFactory", () => {
@@ -8,7 +11,7 @@ describe("inspectLevelEncryptionFactory", () => {
     "stream",
     "level-1",
     "playlist-1",
-    "http://example.com/level.m3u8"
+    "http://example.com/level.m3u8",
   );
 
   it("marks AES-128 as supported", async () => {
@@ -31,7 +34,7 @@ describe("inspectLevelEncryptionFactory", () => {
 
     expect(loader.fetchText).toHaveBeenCalledWith(
       "http://example.com/level.m3u8",
-      2
+      2,
     );
     expect(parser.inspectLevelEncryption).toHaveBeenCalled();
     expect(result).toMatchObject({
@@ -66,5 +69,28 @@ describe("inspectLevelEncryptionFactory", () => {
     expect(result.supported).toBe(false);
     expect(result.method).toBe("SAMPLE-AES");
     expect(result.message).toContain("Unsupported encryption method");
+    expect(result.message).toContain("Only AES-128");
+  });
+});
+
+describe("describeUnsupportedEncryption", () => {
+  it("names the DRM system and explains why it blocks the download", () => {
+    const message = describeUnsupportedEncryption(
+      "DRM-protected DASH (Widevine, PlayReady)",
+    );
+    expect(message).toContain("Protected by Widevine, PlayReady DRM");
+    expect(message).toContain("played but not downloaded");
+  });
+
+  it("names an unsupported HLS method", () => {
+    expect(describeUnsupportedEncryption("SAMPLE-AES")).toBe(
+      "Unsupported encryption method: SAMPLE-AES. Only AES-128 streams can be decrypted.",
+    );
+  });
+
+  it("handles an unknown method", () => {
+    expect(describeUnsupportedEncryption(null)).toBe(
+      "Unsupported encryption method detected.",
+    );
   });
 });

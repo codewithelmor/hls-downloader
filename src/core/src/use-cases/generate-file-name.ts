@@ -18,9 +18,15 @@ export const generateFileName = () => {
     const playlistFilenameWithoutExt = playlistFilename.split(".m3u8")[0];
     const container = options?.container ?? "mp4";
 
-    const filename = playlist.pageTitle
-      ? `${sanitizeFilename(playlist.pageTitle)}-${playlistFilenameWithoutExt}.${container}`
-      : `${playlistFilenameWithoutExt}.${container}`;
+    const videoTitle = playlist.videoTitle
+      ? sanitizeFilename(playlist.videoTitle)
+      : "";
+
+    const filename = videoTitle
+      ? `${videoTitle}.${container}`
+      : playlist.pageTitle
+        ? `${sanitizeFilename(playlist.pageTitle)}-${playlistFilenameWithoutExt}.${container}`
+        : `${playlistFilenameWithoutExt}.${container}`;
 
     return filename.normalize("NFC");
   };

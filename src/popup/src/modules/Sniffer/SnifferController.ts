@@ -36,6 +36,9 @@ const playlistFilter =
     if (p.pageTitle?.toLocaleLowerCase().includes(filterLowerCase)) {
       return true;
     }
+    if (p.videoTitle?.toLocaleLowerCase().includes(filterLowerCase)) {
+      return true;
+    }
     if (p.initiator?.toLocaleLowerCase().includes(filterLowerCase)) {
       return true;
     }
