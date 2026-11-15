@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import PlaylistModule from "../Playlist/PlaylistModule";
+import PlayerCaptureModule from "../PlayerCapture/PlayerCaptureModule";
 import ScreenHeader from "../../components/ScreenHeader";
 import DetailScreen from "../../components/DetailScreen";
 import BottomSheet from "../../components/BottomSheet";
@@ -127,6 +128,8 @@ const SnifferView = ({
               </div>
             }
           />
+
+          {(!bulk || bulk.mode === "idle") && <PlayerCaptureModule />}
 
           {hasPlaylists && (
             <div className="flex shrink-0 items-center gap-2">

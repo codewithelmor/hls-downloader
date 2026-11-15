@@ -397,7 +397,8 @@ const JobView = ({
             )}
             {["error"].includes(status?.status ?? "") && (
               <Button size="sm" variant="default" onClick={downloadJob}>
-                <DownloadIcon className="w-4 h-4 mr-2" /> Retry download
+                <DownloadIcon className="w-4 h-4 mr-2" />{" "}
+                {job.capturedFromPlayer ? "Retry save" : "Retry download"}
               </Button>
             )}
             {["ready", "done", "saving", "error"].includes(status?.status!) && (
@@ -687,7 +688,7 @@ const JobDetailView = ({
               disabled={!isError}
               tabIndex={isError ? undefined : -1}
             >
-              Retry
+              {job.capturedFromPlayer ? "Retry save" : "Retry"}
             </Button>
           </div>
         </div>

@@ -62,6 +62,12 @@ const useJobController = ({ id }: { id: string }): ReturnType => {
   const derived = buildJobViewDerived(status, bucket, availableBytes);
 
   function downloadJob() {
+    // Media recorded from a player has no URLs to fetch again; it is already
+    // stored, so retrying means saving it again.
+    if (job?.capturedFromPlayer) {
+      dispatch(jobsSlice.actions.saveAs({ jobId: id }));
+      return;
+    }
     dispatch(jobsSlice.actions.queue({ jobId: id }));
   }
   function deleteJob() {

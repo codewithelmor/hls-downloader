@@ -9,6 +9,7 @@ import {
   initializeDownloadTracking,
 } from "./services/disk-backed-fs";
 import { StreamParser } from "./services/stream-parser";
+import { createPlayerCapture } from "./services/player-capture-env";
 
 const wrapStore = createWrapStore();
 
@@ -25,6 +26,7 @@ const wrapStore = createWrapStore();
       fs: DiskBackedFS,
       loader: FetchLoader,
       parser: StreamParser,
+      playerCapture: createPlayerCapture(),
     },
     state,
   );

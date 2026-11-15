@@ -52,6 +52,7 @@ interface IJobsReducers {
   download: CaseReducer<IJobsState, PayloadAction<IDownloadJobPayload>>;
   clear: CaseReducer<IJobsState>;
   add: CaseReducer<IJobsState, PayloadAction<IAddJobPayload>>;
+  addCaptured: CaseReducer<IJobsState, PayloadAction<IAddJobPayload>>;
   prepared: CaseReducer<IJobsState, PayloadAction<IAddJobPayload>>;
   queue: CaseReducer<IJobsState, PayloadAction<IDownloadJobPayload>>;
   cancel: CaseReducer<IJobsState, PayloadAction<IDeleteJobPayload>>;
@@ -121,6 +122,18 @@ export const jobsSlice: Slice<IJobsState, IJobsReducers, "jobs"> = createSlice({
         done: 0,
         total: job.videoFragments.length + job.audioFragments.length,
         status: "queued",
+        saveProgress: 0,
+      };
+    },
+    /** Adds a job whose media is already stored (recorded from a player). */
+    addCaptured(state, action: PayloadAction<IAddJobPayload>) {
+      const { job } = action.payload;
+      const total = job.videoFragments.length + job.audioFragments.length;
+      state.jobs[job.id] = job;
+      state.jobsStatus[job.id] = {
+        done: total,
+        total,
+        status: "ready",
         saveProgress: 0,
       };
     },

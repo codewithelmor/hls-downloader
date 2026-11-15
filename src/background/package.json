@@ -10,8 +10,8 @@
     "lib"
   ],
   "scripts": {
-    "dev": "vite build -w",
-    "build": "vite build",
+    "dev": "node scripts/build-capture-scripts.mjs --watch",
+    "build": "vite build && node scripts/build-capture-scripts.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage --coverage.reporter=json-summary"

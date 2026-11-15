@@ -27,5 +27,10 @@ export class Job {
     readonly subtitleName?: string,
     readonly outputContainer?: OutputContainer,
     readonly source?: JobSource,
+    /**
+     * The media was recorded from the page's player rather than downloaded
+     * from URLs, so it can be saved again but not downloaded again.
+     */
+    readonly capturedFromPlayer?: boolean,
   ) {}
 }

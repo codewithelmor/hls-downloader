@@ -31,6 +31,16 @@ export const downloadJobEpic: Epic<
       defer(() => {
         const job = store$.value.jobs.jobs[jobId];
         if (!job) return EMPTY;
+        if (job.capturedFromPlayer) {
+          // Its media came from the page's player, not from URLs.
+          return of(
+            jobsSlice.actions.downloadFailed({
+              jobId,
+              message:
+                "This video was recorded from the page's player and cannot be downloaded again. Capture it again from the player.",
+            }),
+          );
+        }
         const controller = new AbortController();
         const { signal } = controller;
         const jobLoader: ILoader = {

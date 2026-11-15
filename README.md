@@ -140,6 +140,23 @@ Downloads started by an older extension version remain readable through the
 legacy IndexedDB path, but are not migrated; if a legacy finalization runs out
 of memory, delete it and download it again.
 
+### Capture from the player
+
+When a page hides its playlist, use **Start capture** on the **Capture** tab.
+The extension reloads the page and records the media the page's own player
+loads through Media Source Extensions; play the video to the end, then press
+**Stop and save**. The capture becomes a normal download you can rename and
+save as MP4.
+
+- Only what the player loads is recorded. Parts you skip are missing, and the
+  popup reports them as gaps.
+- If the player changes quality midway, only the quality with the most media
+  is kept. Fix the quality in the player's settings to avoid this.
+- Only unencrypted fragmented MP4 is supported. DRM-protected (encrypted)
+  video is refused and nothing is stored, and WebM or MPEG-TS players are
+  reported as unsupported.
+- Each video the page plays during the capture is saved as its own file.
+
 ---
 
 ## 🧑‍💻 Development
@@ -443,6 +460,8 @@ pnpm storybook  # preview popup & design-system components
 src/
 ├─ assets/          # extension manifest & icons
 ├─ background/      # background scripts
+│  └─ src/capture/  # player-capture content scripts, built as standalone
+│                   # files by background/scripts/build-capture-scripts.mjs
 ├─ core/            # shared logic & Redux store
 ├─ design-system/   # UI component library
 └─ popup/           # React popup UI

@@ -211,3 +211,65 @@ export async function listExportIds(): Promise<string[]> {
     throw error;
   }
 }
+
+// Player capture keeps recorded segments here until they are copied into a
+// download job (see services/player-capture.ts).
+const CAPTURES_DIRECTORY = "captures";
+
+async function getCaptureDirectory(
+  sessionId: string,
+  create: boolean,
+): Promise<FileSystemDirectoryHandle> {
+  const version = await getVersionDirectory();
+  const captures = await version.getDirectoryHandle(CAPTURES_DIRECTORY, {
+    create,
+  });
+  return await captures.getDirectoryHandle(sessionId, { create });
+}
+
+export async function writeCaptureChunk(
+  sessionId: string,
+  id: number,
+  data: Uint8Array,
+): Promise<void> {
+  const directory = await getCaptureDirectory(sessionId, true);
+  const handle = await directory.getFileHandle(fragmentFileName(id), {
+    create: true,
+  });
+  const writable = await handle.createWritable();
+  try {
+    await writable.write(data as unknown as FileSystemWriteChunkType);
+    await writable.close();
+  } catch (error) {
+    await writable.abort(error).catch(() => undefined);
+    throw error;
+  }
+}
+
+export async function readCaptureChunk(
+  sessionId: string,
+  id: number,
+): Promise<ArrayBuffer> {
+  const directory = await getCaptureDirectory(sessionId, false);
+  const handle = await directory.getFileHandle(fragmentFileName(id));
+  return await (await handle.getFile()).arrayBuffer();
+}
+
+export async function deleteCaptureSession(sessionId: string): Promise<void> {
+  try {
+    const version = await getVersionDirectory();
+    const captures = await version.getDirectoryHandle(CAPTURES_DIRECTORY);
+    await captures.removeEntry(sessionId, { recursive: true });
+  } catch (error) {
+    if ((error as DOMException)?.name !== "NotFoundError") throw error;
+  }
+}
+
+export async function clearAllCaptures(): Promise<void> {
+  try {
+    const version = await getVersionDirectory();
+    await version.removeEntry(CAPTURES_DIRECTORY, { recursive: true });
+  } catch (error) {
+    if ((error as DOMException)?.name !== "NotFoundError") throw error;
+  }
+}

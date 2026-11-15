@@ -19,6 +19,7 @@
     "storage",
     "downloads",
     "tabs",
+    "scripting",
     "http://*/*",
     "https://*/*"
   ],

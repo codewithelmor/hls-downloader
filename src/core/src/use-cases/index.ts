@@ -26,3 +26,6 @@ export * from "./prepare-job";
 export * from "./select-preferred-audio-level";
 export * from "./select-bulk-downloads";
 export * from "./resolve-video-title";
+export * from "./fmp4";
+export * from "./assemble-captured-track";
+export * from "./save-captured-source";

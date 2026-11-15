@@ -7,3 +7,4 @@ export * from "./subtitles-slice";
 export * from "./level-inspections-slice";
 export * from "./playlist-preferences-slice";
 export * from "./storage-slice";
+export * from "./player-capture-slice";
